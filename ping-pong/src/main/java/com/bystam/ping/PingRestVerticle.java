@@ -1,22 +1,19 @@
 package com.bystam.ping;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.json.JsonArray;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class PingRestVerticle extends AbstractVerticle {
 
     private static final int OK = 200;
     private static final int CREATED = 201;
     private static final int BAD_REQUEST = 400;
-
-    private final List<Service> services = new ArrayList<>();
 
     @Override
     public void start() throws Exception {
@@ -44,37 +41,38 @@ public class PingRestVerticle extends AbstractVerticle {
     }
 
     private void listServices(RoutingContext context) {
-        JsonArray array = new JsonArray();
-        services.stream()
-                .map(JsonObject::mapFrom)
-                .forEach(array::add);
-        JsonObject body = new JsonObject();
-        body.put("services", array);
-
-        context.response()
-                .putHeader("Content-Type", "application/json")
-                .setStatusCode(OK)
-                .end(body.toString());
+        vertx.eventBus().send("services.get_all", null, (Handler<AsyncResult<Message<JsonObject>>>) event -> {
+            if (event.succeeded()) {
+                context.response()
+                        .putHeader("Content-Type", "application/json")
+                        .setStatusCode(OK)
+                        .end(event.result().body().toString());
+            } else {
+                context.response()
+                        .setStatusCode(BAD_REQUEST)
+                        .end();
+            }
+        });
     }
 
     private void insertService(RoutingContext context) {
-        JsonObject body = context.getBodyAsJson();
-        String url = body.getString("url");
-
-        if (url == null) {
-            context.response().setStatusCode(BAD_REQUEST).end();
-        } else {
-            services.add(new Service(url, 0));
-            context.response().setStatusCode(CREATED).end();
-        }
+        vertx.eventBus().send("services.insert", context.getBodyAsJson(), event -> {
+            if (event.succeeded()) {
+                context.response().setStatusCode(CREATED).end();
+            } else {
+                context.response().setStatusCode(BAD_REQUEST).end();
+            }
+        });
     }
 
     private void deleteService(RoutingContext context) {
-        //String serviceId = context.queryParams().get("service_id");
-        services.stream()
-                .filter(s -> true) // TODO filter based on ID
-                .findFirst()
-                .ifPresent(services::remove);
-        context.response().setStatusCode(OK).end();
+        String serviceId = context.queryParams().get("service_id");
+        vertx.eventBus().send("services.delete", serviceId, event -> {
+            if (event.succeeded()) {
+                context.response().setStatusCode(OK).end();
+            } else {
+                context.response().setStatusCode(BAD_REQUEST).end();
+            }
+        });
     }
 }
