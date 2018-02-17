@@ -42,7 +42,7 @@ public class PingRestVerticle extends AbstractVerticle {
     }
 
     private void listServices(RoutingContext context) {
-        vertx.eventBus().send("services.get_all", null, (Handler<AsyncResult<Message<JsonArray>>>) event -> {
+        vertx.eventBus().send(ServiceDatabaseVerticle.GET_ALL, null, (Handler<AsyncResult<Message<JsonArray>>>) event -> {
             if (event.succeeded()) {
 
                 JsonObject body = new JsonObject()
@@ -61,7 +61,7 @@ public class PingRestVerticle extends AbstractVerticle {
     }
 
     private void insertService(RoutingContext context) {
-        vertx.eventBus().send("services.insert", context.getBodyAsJson(), event -> {
+        vertx.eventBus().send(ServiceDatabaseVerticle.INSERT, context.getBodyAsJson(), event -> {
             if (event.succeeded()) {
                 context.response().setStatusCode(CREATED).end();
             } else {
@@ -71,8 +71,8 @@ public class PingRestVerticle extends AbstractVerticle {
     }
 
     private void deleteService(RoutingContext context) {
-        String serviceId = context.queryParams().get("service_id");
-        vertx.eventBus().send("services.delete", serviceId, event -> {
+        String serviceId = context.pathParam("service_id");
+        vertx.eventBus().send(ServiceDatabaseVerticle.DELETE, serviceId, event -> {
             if (event.succeeded()) {
                 context.response().setStatusCode(OK).end();
             } else {

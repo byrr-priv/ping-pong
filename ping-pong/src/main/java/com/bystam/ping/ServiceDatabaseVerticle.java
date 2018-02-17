@@ -7,16 +7,22 @@ import io.vertx.core.file.FileSystem;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.UUID;
+
 public class ServiceDatabaseVerticle extends AbstractVerticle {
+
+    public static final String GET_ALL = "services.get_all";
+    public static final String INSERT = "services.insert";
+    public static final String DELETE = "services.delete";
 
     private static final String SERVICES_FILE = "/tmp/.ping_services_db.json";
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
 
-        vertx.eventBus().consumer("services.get_all", this::getAllServices);
-        vertx.eventBus().consumer("services.insert", this::insertService);
-        vertx.eventBus().consumer("services.delete", this::deleteService);
+        vertx.eventBus().consumer(GET_ALL, this::getAllServices);
+        vertx.eventBus().consumer(INSERT, this::insertService);
+        vertx.eventBus().consumer(DELETE, this::deleteService);
 
         vertx.fileSystem().exists(SERVICES_FILE, event -> {
            if (!event.result()) {
@@ -44,8 +50,9 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
     }
 
     private void insertService(Message<JsonObject> message) {
+        JsonObject newService = message.body()
+                .put("id", UUID.randomUUID().toString());
 
-        JsonObject newService = message.body();
         FileSystem fs = vertx.fileSystem();
 
         fs.readFile(SERVICES_FILE, event -> {
@@ -67,18 +74,19 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
     }
 
     private void deleteService(Message<String> message) {
-        //String serviceId = message.body();
+        String serviceId = message.body();
         FileSystem fs = vertx.fileSystem();
 
         fs.readFile(SERVICES_FILE, event -> {
             if (event.succeeded()) {
-                JsonArray services = event.result().toJsonArray();
 
-                if (!services.isEmpty()) {
-                    services.remove(0);
-                }
+                JsonArray updated = new JsonArray();
+                event.result().toJsonArray().stream()
+                        .map(o -> (JsonObject)o)
+                        .filter(o -> !o.getString("id").equals(serviceId))
+                        .forEach(updated::add);
 
-                fs.writeFile(SERVICES_FILE, services.toBuffer(), event1 -> {
+                fs.writeFile(SERVICES_FILE, updated.toBuffer(), event1 -> {
                     if (event1.succeeded()) {
                         message.reply("success");
                     } else {
