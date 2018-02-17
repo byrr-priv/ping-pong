@@ -4,6 +4,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -41,12 +42,16 @@ public class PingRestVerticle extends AbstractVerticle {
     }
 
     private void listServices(RoutingContext context) {
-        vertx.eventBus().send("services.get_all", null, (Handler<AsyncResult<Message<JsonObject>>>) event -> {
+        vertx.eventBus().send("services.get_all", null, (Handler<AsyncResult<Message<JsonArray>>>) event -> {
             if (event.succeeded()) {
+
+                JsonObject body = new JsonObject()
+                        .put("services", event.result().body());
+
                 context.response()
                         .putHeader("Content-Type", "application/json")
                         .setStatusCode(OK)
-                        .end(event.result().body().toString());
+                        .end(body.toString());
             } else {
                 context.response()
                         .setStatusCode(BAD_REQUEST)

@@ -1,20 +1,21 @@
 package com.bystam.ping;
 
+import io.vertx.core.json.JsonObject;
+
 public class Service {
 
     private final String url;
-    private final long lastCheckedTimestamp;
 
-    public Service(String url, long lastCheckedTimestamp) {
+    public Service(String url) {
         this.url = url;
-        this.lastCheckedTimestamp = lastCheckedTimestamp;
+    }
+
+    public Service(JsonObject json) {
+        this.url = json.getString("url");
     }
 
     public String getUrl() {
         return url;
     }
 
-    public long getLastCheckedTimestamp() {
-        return lastCheckedTimestamp;
-    }
 }
