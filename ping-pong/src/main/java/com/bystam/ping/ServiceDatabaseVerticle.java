@@ -26,13 +26,7 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
 
         vertx.fileSystem().exists(SERVICES_FILE, event -> {
            if (!event.result()) {
-               vertx.fileSystem().writeFile(SERVICES_FILE, new JsonArray().toBuffer(), event1 -> {
-                  if (event1.succeeded()) {
-                      startFuture.complete();
-                   } else {
-                      startFuture.fail(event1.cause());
-                   }
-               });
+               vertx.fileSystem().writeFile(SERVICES_FILE, new JsonArray().toBuffer(), startFuture.completer());
            } else {
                startFuture.complete();
            }
