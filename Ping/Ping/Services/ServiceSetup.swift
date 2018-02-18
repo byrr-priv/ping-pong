@@ -15,7 +15,8 @@ class AppServices {
     /// MARK: - Services setup
 
     private func setupAllServices() {
-        
+        let api = _PingAPI(baseURL: URL(string: "http://localhost:8080")!)
+        add(service: api, forType: PingAPI.self)
     }
 
     private func add<T>(service: Any, forType type: T.Type) {

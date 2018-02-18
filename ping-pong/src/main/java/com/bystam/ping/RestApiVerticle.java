@@ -19,7 +19,7 @@ public class RestApiVerticle extends AbstractVerticle {
     private static final int CREATED = 201;
     private static final int BAD_REQUEST = 400;
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-mm-dd HH:mm");
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     @Override
     public void start() throws Exception {

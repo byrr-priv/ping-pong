@@ -42,7 +42,7 @@ class _PingAPI: PingAPI {
     func getAll() -> HTTPClient.Task<Ping.Response> {
         return client
             .fireAndGet(.get, path: "/service", body: nil)
-            .map(to: Ping.Response.self)
+            .map(to: Ping.Response.self, with: decoder)
     }
 
     func add(_ request: Ping.AddRequest) -> HTTPClient.Task<Void> {
