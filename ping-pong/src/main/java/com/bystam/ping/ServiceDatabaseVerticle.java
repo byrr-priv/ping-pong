@@ -14,6 +14,7 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
     public static final String GET_ALL = "services.get_all";
     public static final String INSERT = "services.insert";
     public static final String DELETE = "services.delete";
+    public static final String UPDATE_PING = "services.update_ping";
 
     private static final String SERVICES_FILE = "/tmp/.ping_services_db.json";
 
@@ -23,6 +24,7 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
         vertx.eventBus().consumer(GET_ALL, this::getAllServices);
         vertx.eventBus().consumer(INSERT, this::insertService);
         vertx.eventBus().consumer(DELETE, this::deleteService);
+        vertx.eventBus().consumer(UPDATE_PING, this::updatePing);
 
         vertx.fileSystem().exists(SERVICES_FILE, event -> {
            if (!event.result()) {
@@ -91,5 +93,9 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
                 message.fail(404, "file missing");
             }
         });
+    }
+
+    private void updatePing(Message<JsonObject> message) {
+        System.out.println("ping result: " + message.body());
     }
 }
