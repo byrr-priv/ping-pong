@@ -1,13 +1,8 @@
 package com.bystam.ping;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.codec.BodyCodec;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,14 +12,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
-public class PingRestVerticleTest {
+public class RestApiVerticleTest {
 
     private Vertx vertx;
 
     @Before
     public void setUp(TestContext context) {
         vertx = Vertx.vertx();
-        vertx.deployVerticle(PingRestVerticle.class.getName(),
+        vertx.deployVerticle(RestApiVerticle.class.getName(),
                 context.asyncAssertSuccess());
     }
 

@@ -11,7 +11,7 @@ import io.vertx.ext.web.client.WebClient;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DomainPingerVerticle extends AbstractVerticle {
+public class UrlPingerVerticle extends AbstractVerticle {
 
     private static final long PERIOD = 60 * 1000; // 60 seconds
 

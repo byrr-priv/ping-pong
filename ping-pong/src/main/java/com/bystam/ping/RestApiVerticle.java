@@ -13,7 +13,7 @@ import io.vertx.ext.web.handler.BodyHandler;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class PingRestVerticle extends AbstractVerticle {
+public class RestApiVerticle extends AbstractVerticle {
 
     private static final int OK = 200;
     private static final int CREATED = 201;

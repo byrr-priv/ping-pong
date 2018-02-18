@@ -7,7 +7,7 @@ public class MainVerticle extends AbstractVerticle {
     @Override
     public void start() throws Exception {
         vertx.deployVerticle(ServiceDatabaseVerticle.class.getName());
-        vertx.deployVerticle(PingRestVerticle.class.getName());
-        vertx.deployVerticle(DomainPingerVerticle.class.getName());
+        vertx.deployVerticle(RestApiVerticle.class.getName());
+        vertx.deployVerticle(UrlPingerVerticle.class.getName());
     }
 }
