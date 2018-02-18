@@ -91,7 +91,7 @@ public extension HTTPClient {
             return self
         }
 
-        public func queue(_ queue: DispatchQueue) -> Task<T> {
+        public func dispatch(on queue: DispatchQueue) -> Task<T> {
             callbackQueue = queue
             return self
         }
@@ -167,10 +167,11 @@ public extension HTTPClient.Task where T == Data {
     public func map<U: Decodable>(to type: U.Type, with decoder: JSONDecoder = JSONDecoder()) -> HTTPClient.Task<U> {
         let task = HTTPClient.DecodableTask<U>(decoder: decoder)
         task.task = self.task
+        task.errorHandler = self.errorHandler
+        task.callbackQueue = self.callbackQueue
         self.successHandler = { data in
             task.consume(data: data)
         }
-        task.errorHandler = self.errorHandler
         return task
     }
 }
