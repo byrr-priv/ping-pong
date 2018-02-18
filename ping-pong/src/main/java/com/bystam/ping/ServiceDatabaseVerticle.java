@@ -36,11 +36,11 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
     }
 
     private void getAllServices(Message<Void> message) {
-        vertx.fileSystem().readFile(SERVICES_FILE, event -> {
-            if (event.succeeded()) {
-                message.reply(event.result().toJsonArray());
+        readServices().setHandler(ar -> {
+            if (ar.succeeded()) {
+                message.reply(ar.result());
             } else {
-                message.fail(404, "file missing");
+                message.fail(-1000, ar.cause().getMessage());
             }
         });
     }
@@ -49,53 +49,67 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
         JsonObject newService = message.body()
                 .put("id", UUID.randomUUID().toString());
 
-        FileSystem fs = vertx.fileSystem();
-
-        fs.readFile(SERVICES_FILE, event -> {
-            if (event.succeeded()) {
-                JsonArray services = event.result().toJsonArray();
-                services.add(newService);
-
-                fs.writeFile(SERVICES_FILE, services.toBuffer(), event1 -> {
-                    if (event1.succeeded()) {
+        readServices()
+                .compose(services -> {
+                    services.add(newService);
+                    return writeServices(services);
+                })
+                .setHandler(ar -> {
+                    if (ar.succeeded()) {
                         message.reply("success");
                     } else {
-                        message.fail(404, "file missing");
+                        message.fail(-1000, ar.cause().getMessage());
                     }
                 });
-            } else {
-                message.fail(404, "file missing");
-            }
-        });
     }
 
     private void deleteService(Message<String> message) {
         String serviceId = message.body();
         FileSystem fs = vertx.fileSystem();
 
-        fs.readFile(SERVICES_FILE, event -> {
-            if (event.succeeded()) {
-
-                JsonArray updated = new JsonArray();
-                event.result().toJsonArray().stream()
-                        .map(o -> (JsonObject)o)
-                        .filter(o -> !o.getString("id").equals(serviceId))
-                        .forEach(updated::add);
-
-                fs.writeFile(SERVICES_FILE, updated.toBuffer(), event1 -> {
-                    if (event1.succeeded()) {
+        readServices()
+                .compose(services -> {
+                    JsonArray updated = new JsonArray();
+                    services.stream()
+                            .map(o -> (JsonObject)o)
+                            .filter(o -> !o.getString("id").equals(serviceId))
+                            .forEach(updated::add);
+                    return writeServices(updated);
+                })
+                .setHandler(ar -> {
+                    if (ar.succeeded()) {
                         message.reply("success");
                     } else {
-                        message.fail(404, "file missing");
+                        message.fail(-1000, ar.cause().getMessage());
                     }
                 });
-            } else {
-                message.fail(404, "file missing");
-            }
-        });
     }
 
     private void updatePing(Message<JsonObject> message) {
         System.out.println("ping result: " + message.body());
+    }
+
+    private Future<JsonArray> readServices() {
+        Future<JsonArray> future = Future.future();
+        vertx.fileSystem().readFile(SERVICES_FILE, ar -> {
+           if (ar.succeeded()) {
+               future.complete(ar.result().toJsonArray());
+           } else {
+               future.fail(ar.cause());
+           }
+        });
+        return future;
+    }
+
+    private Future<Void> writeServices(JsonArray services) {
+        Future<Void> future = Future.future();
+        vertx.fileSystem().writeFile(SERVICES_FILE, services.toBuffer(), ar -> {
+            if (ar.succeeded()) {
+                future.complete();
+            } else {
+                future.fail(ar.cause());
+            }
+        });
+        return future;
     }
 }
