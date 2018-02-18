@@ -45,7 +45,6 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
     }
 
     private void insertService(Message<JsonObject> message) {
-        // TODO: filter input here a bit
         JsonObject newService = message.body()
                 .put("id", UUID.randomUUID().toString());
 

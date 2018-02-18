@@ -10,11 +10,16 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class PingRestVerticle extends AbstractVerticle {
 
     private static final int OK = 200;
     private static final int CREATED = 201;
     private static final int BAD_REQUEST = 400;
+
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-mm-dd HH:mm");
 
     @Override
     public void start() throws Exception {
@@ -42,11 +47,21 @@ public class PingRestVerticle extends AbstractVerticle {
     }
 
     private void listServices(RoutingContext context) {
-        vertx.eventBus().send(ServiceDatabaseVerticle.GET_ALL, null, (Handler<AsyncResult<Message<JsonArray>>>) event -> {
-            if (event.succeeded()) {
+        vertx.eventBus().send(ServiceDatabaseVerticle.GET_ALL, null, (Handler<AsyncResult<Message<JsonArray>>>) ar -> {
+            if (ar.succeeded()) {
+
+                // reformat timestamps in a readable time format
+                JsonArray services = ar.result().body();
+                services.forEach(o -> {
+                    JsonObject service = (JsonObject)o;
+                    Long time = service.getLong("lastChecked");
+                    if (time != null) {
+                        service.put("lastChecked", DATE_FORMAT.format(new Date(time)));
+                    }
+                });
 
                 JsonObject body = new JsonObject()
-                        .put("services", event.result().body());
+                        .put("services", services);
 
                 context.response()
                         .putHeader("Content-Type", "application/json")
@@ -61,7 +76,20 @@ public class PingRestVerticle extends AbstractVerticle {
     }
 
     private void insertService(RoutingContext context) {
-        vertx.eventBus().send(ServiceDatabaseVerticle.INSERT, context.getBodyAsJson(), event -> {
+        JsonObject body = context.getBodyAsJson();
+        String url = body.getString("url");
+        String name = body.getString("name");
+
+        if (url == null || name == null) {
+            context.response().setStatusCode(BAD_REQUEST).end();
+            return;
+        }
+
+        JsonObject message = new JsonObject()
+                .put("url", url)
+                .put("name", name);
+
+        vertx.eventBus().send(ServiceDatabaseVerticle.INSERT, message, event -> {
             if (event.succeeded()) {
                 context.response().setStatusCode(CREATED).end();
             } else {
