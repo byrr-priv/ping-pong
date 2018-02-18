@@ -69,7 +69,7 @@ public class UrlPingerVerticle extends AbstractVerticle {
 
     private Future<PingResponse> pingService(PingRequest request) {
         Future<PingResponse> pingFuture = Future.future();
-        client.getAbs(request.url).send(response -> {
+        client.getAbs(request.url).timeout(3000).ssl(request.url.startsWith("https")).send(response -> {
             if (response.succeeded() && response.result().statusCode() == 200) {
                 pingFuture.complete(new PingResponse(request.serviceId, "OK"));
             } else {
