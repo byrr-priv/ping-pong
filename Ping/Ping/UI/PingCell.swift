@@ -20,8 +20,20 @@ class PingCell: UITableViewCell, NibBased {
     func configure(with service: Ping.Service) -> PingCell {
         nameLabel.text = service.name
         urlLabel.text = service.url.absoluteString
-        statusLabel.text = service.status?.rawValue ?? "PENDING"
         timeLabel.text = service.lastCheck.map(dateFormatter.string)
+
+        switch service.status {
+        case .ok?:
+            statusLabel.text = "OK"
+            statusLabel.textColor = UIColor.green.withAlphaComponent(0.7)
+        case .fail?:
+            statusLabel.text = "FAIL"
+            statusLabel.textColor = UIColor.red.withAlphaComponent(0.7)
+        case nil:
+            statusLabel.text = "Pending..."
+            statusLabel.textColor = UIColor.yellow.withAlphaComponent(0.7)
+        }
+
         return self
     }
 }
