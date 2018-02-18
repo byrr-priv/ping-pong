@@ -5,6 +5,7 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -21,7 +22,7 @@ public class UrlPingerVerticle extends AbstractVerticle {
     public void start() throws Exception {
         super.start();
 
-        client = vertx.createHttpClient();
+        client = vertx.createHttpClient(new HttpClientOptions().setSsl(true));
 
         vertx.setPeriodic(PERIOD, this::pingAllServices);
     }

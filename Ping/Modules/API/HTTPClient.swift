@@ -53,9 +53,11 @@ public class HTTPClient {
     private func request<T>(_ method: HTTPMethod, url: URL, body: Data?, task: Task<T>) -> Task<T> {
         var request = URLRequest(url: url)
         request.httpMethod = method.stringValue
+
         if let body = body {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.setValue("\(body.count)", forHTTPHeaderField: "Content-Length")
+            request.httpBody = body
         }
 
         task.task = HTTPClient.urlSession.dataTask(with: request) { (data, response, error) in

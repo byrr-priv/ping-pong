@@ -32,7 +32,13 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
-                    <navigationItem key="navigationItem" title="Ping" id="gi6-PQ-8nw"/>
+                    <navigationItem key="navigationItem" title="Ping" id="gi6-PQ-8nw">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="Gac-6z-gff">
+                            <connections>
+                                <action selector="addButtonPressed:" destination="BYZ-38-t0r" id="HMf-o1-cEU"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="tableView" destination="gCA-9M-CS9" id="bd1-ej-42C"/>
                     </connections>

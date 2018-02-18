@@ -31,7 +31,7 @@ class PingCell: UITableViewCell, NibBased {
             statusLabel.textColor = UIColor.red.withAlphaComponent(0.7)
         case nil:
             statusLabel.text = "Pending..."
-            statusLabel.textColor = UIColor.yellow.withAlphaComponent(0.7)
+            statusLabel.textColor = UIColor.brown.withAlphaComponent(0.7)
         }
 
         return self

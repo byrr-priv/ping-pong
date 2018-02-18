@@ -29,7 +29,7 @@ extension Ping {
 extension Ping {
 
     struct AddRequest: Encodable {
-        let url: String
+        let url: URL
         let name: String
     }
 }

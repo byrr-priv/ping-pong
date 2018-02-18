@@ -7,6 +7,11 @@ import Bindings
 
 final class PingViewModel {
 
+    enum InputError: Error {
+        case nameEmpty
+        case malformedURL
+    }
+
     let services = Variable<[Ping.Service]>([])
 
 }
@@ -20,9 +25,44 @@ extension PingViewModel {
             .onSuccess { (res) in
                 self.services.set(res.services)
             }
-            .onError(handler: { (err) in
-                debugPrint(err)
-            })
+            .onError { (error) in
+                debugPrint(error)
+            }
+            .start()
+    }
+
+    func addService(name: String, url string: String) throws {
+        guard !name.isEmpty else {
+            throw InputError.nameEmpty
+        }
+        guard let url = URL(string: string) else {
+            throw InputError.malformedURL
+        }
+
+        let request = Ping.AddRequest(url: url, name: name)
+        let api = Services.find(type: PingAPI.self)
+        api.add(request)
+            .dispatch(on: .main)
+            .onSuccess {
+                self.fetchServices()
+            }
+            .onError { (error) in
+                debugPrint(error)
+            }
+            .start()
+    }
+
+    func deleteService(at index: Int) {
+        let service = services.value[index]
+        let api = Services.find(type: PingAPI.self)
+        api.delete(id: service.id)
+            .dispatch(on: .main)
+            .onSuccess {
+                self.fetchServices()
+            }
+            .onError { (error) in
+                debugPrint(error)
+            }
             .start()
     }
 }
