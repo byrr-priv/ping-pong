@@ -3,7 +3,6 @@ package com.bystam.ping;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.file.FileSystem;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -65,7 +64,6 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
 
     private void deleteService(Message<String> message) {
         String serviceId = message.body();
-        FileSystem fs = vertx.fileSystem();
 
         readServices()
                 .compose(services -> {
@@ -86,7 +84,25 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
     }
 
     private void updatePing(Message<JsonObject> message) {
-        System.out.println("ping result: " + message.body());
+        long time = System.currentTimeMillis();
+        JsonObject pingResults = message.body();
+
+        readServices()
+                .compose(services -> {
+
+                    // set ping result state for each service
+                    services.stream()
+                            .forEach(o -> {
+                        JsonObject service = (JsonObject)o;
+                        String serviceId = service.getString("id");
+
+                        service
+                                .put("status", pingResults.getString(serviceId))
+                                .put("lastChecked", time);
+                    });
+
+                    return writeServices(services);
+                });
     }
 
     private Future<JsonArray> readServices() {
