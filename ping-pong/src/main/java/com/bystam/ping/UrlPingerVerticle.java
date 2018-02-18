@@ -4,9 +4,9 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.client.WebClient;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,13 +15,13 @@ public class UrlPingerVerticle extends AbstractVerticle {
 
     private static final long PERIOD = 60 * 1000; // 60 seconds
 
-    private WebClient client;
+    private HttpClient client;
 
     @Override
     public void start() throws Exception {
         super.start();
 
-        client = WebClient.create(vertx);
+        client = vertx.createHttpClient();
 
         vertx.setPeriodic(PERIOD, this::pingAllServices);
     }
@@ -69,13 +69,14 @@ public class UrlPingerVerticle extends AbstractVerticle {
 
     private Future<PingResponse> pingService(PingRequest request) {
         Future<PingResponse> pingFuture = Future.future();
-        client.getAbs(request.url).timeout(3000).ssl(request.url.startsWith("https")).send(response -> {
-            if (response.succeeded() && response.result().statusCode() == 200) {
+
+        client.getAbs(request.url).handler(response -> {
+            if (response.statusCode() == 200) {
                 pingFuture.complete(new PingResponse(request.serviceId, "OK"));
             } else {
                 pingFuture.complete(new PingResponse(request.serviceId, "FAIL"));
             }
-        });
+        }).end();
         return pingFuture;
     }
 
