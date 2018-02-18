@@ -28,29 +28,29 @@ public class HTTPClient {
         self.baseURL = baseURL
     }
 
-    public func fireAndForget(_ method: HTTPMethod, path: String, body: Data?) -> Task<Void> {
+    public func completingRequest(_ method: HTTPMethod, path: String, body: Data?) -> Task<Void> {
         guard let url = URL(string: baseURL.absoluteString.appending(path)) else {
             fatalError()
         }
-        return fire(method, url: url, body: body, task: VoidTask())
+        return request(method, url: url, body: body, task: VoidTask())
     }
 
-    public func fireAndForget(_ method: HTTPMethod, url: URL, body: Data?) -> Task<Void> {
-        return fire(method, url: url, body: body, task: VoidTask())
+    public func completingRequest(_ method: HTTPMethod, url: URL, body: Data?) -> Task<Void> {
+        return request(method, url: url, body: body, task: VoidTask())
     }
 
-    public func fireAndGet(_ method: HTTPMethod, path: String, body: Data?) -> Task<Data> {
+    public func dataRequest(_ method: HTTPMethod, path: String, body: Data?) -> Task<Data> {
         guard let url = URL(string: baseURL.absoluteString.appending(path)) else {
             fatalError()
         }
-        return fire(method, url: url, body: body, task: DataTask())
+        return request(method, url: url, body: body, task: DataTask())
     }
 
-    public func fireAndGet(_ method: HTTPMethod, url: URL, body: Data?) -> Task<Data> {
-        return fire(method, url: url, body: body, task: DataTask())
+    public func dataRequest(_ method: HTTPMethod, url: URL, body: Data?) -> Task<Data> {
+        return request(method, url: url, body: body, task: DataTask())
     }
 
-    private func fire<T>(_ method: HTTPMethod, url: URL, body: Data?, task: Task<T>) -> Task<T> {
+    private func request<T>(_ method: HTTPMethod, url: URL, body: Data?, task: Task<T>) -> Task<T> {
         var request = URLRequest(url: url)
         request.httpMethod = method.stringValue
         if let body = body {
