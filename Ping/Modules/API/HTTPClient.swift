@@ -5,9 +5,9 @@
 import Foundation
 
 public struct HTTPMethod {
-    let stringValue: String
+    public let stringValue: String
 
-    init(_ stringValue: String) {
+    public init(_ stringValue: String) {
         self.stringValue = stringValue
     }
 }
@@ -15,6 +15,7 @@ public struct HTTPMethod {
 public extension HTTPMethod {
     public static let get = HTTPMethod("GET")
     public static let post = HTTPMethod("POST")
+    public static let delete = HTTPMethod("DELETE")
 }
 
 public class HTTPClient {
@@ -22,27 +23,41 @@ public class HTTPClient {
     private static let urlSession = URLSession(configuration: .default)
 
     private let baseURL: URL
-    private let decoder: JSONDecoder
 
-    init(baseURL: URL, decoder: JSONDecoder = JSONDecoder()) {
+    public init(baseURL: URL) {
         self.baseURL = baseURL
-        self.decoder = decoder
     }
 
-    func perform<T>(_ method: HTTPMethod, path: String, responseType type: T.Type) -> Task<T> {
+    public func fireAndForget(_ method: HTTPMethod, path: String, body: Data?) -> Task<Void> {
         guard let url = URL(string: baseURL.absoluteString.appending(path)) else {
             fatalError()
         }
-
-        return self.perform(method, url: url, responseType: type)
+        return fire(method, url: url, body: body, task: VoidTask())
     }
 
-    func perform<T>(_ method: HTTPMethod, url: URL, responseType type: T.Type) -> Task<T> {
+    public func fireAndForget(_ method: HTTPMethod, url: URL, body: Data?) -> Task<Void> {
+        return fire(method, url: url, body: body, task: VoidTask())
+    }
 
+    public func fireAndGet(_ method: HTTPMethod, path: String, body: Data?) -> Task<Data> {
+        guard let url = URL(string: baseURL.absoluteString.appending(path)) else {
+            fatalError()
+        }
+        return fire(method, url: url, body: body, task: DataTask())
+    }
+
+    public func fireAndGet(_ method: HTTPMethod, url: URL, body: Data?) -> Task<Data> {
+        return fire(method, url: url, body: body, task: DataTask())
+    }
+
+    private func fire<T>(_ method: HTTPMethod, url: URL, body: Data?, task: Task<T>) -> Task<T> {
         var request = URLRequest(url: url)
         request.httpMethod = method.stringValue
+        if let body = body {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("\(body.count)", forHTTPHeaderField: "Content-Length")
+        }
 
-        let task = Task<T>()
         task.task = HTTPClient.urlSession.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 task.consume(error: error)
@@ -50,26 +65,19 @@ public class HTTPClient {
                 task.consume(data: data)
             }
         }
-        task.decoder = decoder
         return task
     }
 }
 
 public extension HTTPClient {
 
-    public class Task<T: Decodable> {
-
-        public enum DebugPrintMode {
-            case none, raw, parsed
-        }
+    public class Task<T> {
 
         fileprivate var task: URLSessionTask!
-        fileprivate var decoder: JSONDecoder!
 
-        private var callbackQueue: DispatchQueue?
-        private var successHandler: ((T) -> Void)?
-        private var errorHandler: ((Error) -> Void)?
-        private var debugPrintMode: DebugPrintMode = .none
+        fileprivate var callbackQueue: DispatchQueue?
+        fileprivate var successHandler: ((T) -> Void)?
+        fileprivate var errorHandler: ((Error) -> Void)?
 
         @discardableResult
         public func start() -> Task<T> {
@@ -88,11 +96,6 @@ public extension HTTPClient {
             return self
         }
 
-        public func debugPrint(_ mode: DebugPrintMode) -> Task<T> {
-            debugPrintMode = mode
-            return self
-        }
-
         public func onSuccess(handler: @escaping (T) -> Void) -> Task<T> {
             successHandler = handler
             return self
@@ -104,24 +107,16 @@ public extension HTTPClient {
         }
 
         fileprivate func consume(data: Data) {
-            do {
-                if debugPrintMode == .raw, let string = String(data: data, encoding: .utf8) {
-                    print(string)
-                }
-                let response = try decoder.decode(T.self, from: data)
-                if debugPrintMode == .parsed {
-                    print(response)
-                }
+            fatalError("Override in subclasses")
+        }
 
-                if let queue = callbackQueue {
-                    queue.async {
-                        self.successHandler?(response)
-                    }
-                } else {
-                    successHandler?(response)
+        fileprivate func finish(with value: T) {
+            if let queue = callbackQueue {
+                queue.async {
+                    self.successHandler?(value)
                 }
-            } catch let error {
-                consume(error: error)
+            } else {
+                successHandler?(value)
             }
         }
 
@@ -134,5 +129,48 @@ public extension HTTPClient {
                 errorHandler?(error)
             }
         }
+    }
+
+    fileprivate class VoidTask: Task<Void> {
+        override func consume(data: Data) {
+            finish(with: ())
+        }
+    }
+
+    fileprivate class DataTask: Task<Data> {
+        override func consume(data: Data) {
+            finish(with: data)
+        }
+    }
+
+    fileprivate class DecodableTask<U: Decodable>: Task<U> {
+
+        private let decoder: JSONDecoder
+
+        init(decoder: JSONDecoder) {
+            self.decoder = decoder
+        }
+
+        override func consume(data: Data) {
+            do {
+                let value = try decoder.decode(U.self, from: data)
+                finish(with: value)
+            } catch let error {
+                consume(error: error)
+            }
+        }
+    }
+}
+
+public extension HTTPClient.Task where T == Data {
+
+    public func map<U: Decodable>(to type: U.Type, with decoder: JSONDecoder = JSONDecoder()) -> HTTPClient.Task<U> {
+        let task = HTTPClient.DecodableTask<U>(decoder: decoder)
+        task.task = self.task
+        self.successHandler = { data in
+            task.consume(data: data)
+        }
+        task.errorHandler = self.errorHandler
+        return task
     }
 }

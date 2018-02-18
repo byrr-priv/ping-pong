@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DB005B322039C56100D5DFD0 /* libAPI.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DB5BA7E22039AD0E00CE4793 /* libAPI.a */; };
+		DB005B332039C56100D5DFD0 /* libBindings.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DB5BA7E02039AD0E00CE4793 /* libBindings.a */; };
 		DB5BA7B82039ACF100CE4793 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB5BA7B72039ACF100CE4793 /* AppDelegate.swift */; };
 		DB5BA7BA2039ACF100CE4793 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB5BA7B92039ACF100CE4793 /* ViewController.swift */; };
 		DB5BA7BD2039ACF100CE4793 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DB5BA7BB2039ACF100CE4793 /* Main.storyboard */; };
@@ -14,6 +16,8 @@
 		DB5BA7C22039ACF100CE4793 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DB5BA7C02039ACF100CE4793 /* LaunchScreen.storyboard */; };
 		DB5BA7F52039ADA300CE4793 /* Services.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB5BA7F02039ADA200CE4793 /* Services.swift */; };
 		DB5BA7F62039ADA300CE4793 /* ServiceSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB5BA7F12039ADA200CE4793 /* ServiceSetup.swift */; };
+		DB5BA8022039B39800CE4793 /* PingAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB5BA8012039B39800CE4793 /* PingAPI.swift */; };
+		DB5BA8042039B40100CE4793 /* PingAPITypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB5BA8032039B40100CE4793 /* PingAPITypes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +62,8 @@
 		DB5BA7CA2039AD0E00CE4793 /* Modules.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Modules.xcodeproj; sourceTree = "<group>"; };
 		DB5BA7F02039ADA200CE4793 /* Services.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Services.swift; sourceTree = "<group>"; };
 		DB5BA7F12039ADA200CE4793 /* ServiceSetup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServiceSetup.swift; sourceTree = "<group>"; };
+		DB5BA8012039B39800CE4793 /* PingAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingAPI.swift; sourceTree = "<group>"; };
+		DB5BA8032039B40100CE4793 /* PingAPITypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingAPITypes.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,18 +71,28 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB005B322039C56100D5DFD0 /* libAPI.a in Frameworks */,
+				DB005B332039C56100D5DFD0 /* libBindings.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		DB005B312039C56100D5DFD0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		DB5BA7AB2039ACF100CE4793 = {
 			isa = PBXGroup;
 			children = (
 				DB5BA7C92039AD0E00CE4793 /* Modules */,
 				DB5BA7B62039ACF100CE4793 /* Ping */,
 				DB5BA7B52039ACF100CE4793 /* Products */,
+				DB005B312039C56100D5DFD0 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -121,6 +137,7 @@
 			children = (
 				DB5BA7F02039ADA200CE4793 /* Services.swift */,
 				DB5BA7F12039ADA200CE4793 /* ServiceSetup.swift */,
+				DB5BA8002039B38200CE4793 /* API */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -142,6 +159,15 @@
 				DB5BA7BB2039ACF100CE4793 /* Main.storyboard */,
 			);
 			path = UI;
+			sourceTree = "<group>";
+		};
+		DB5BA8002039B38200CE4793 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				DB5BA8012039B39800CE4793 /* PingAPI.swift */,
+				DB5BA8032039B40100CE4793 /* PingAPITypes.swift */,
+			);
+			path = API;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -241,7 +267,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB5BA8042039B40100CE4793 /* PingAPITypes.swift in Sources */,
 				DB5BA7BA2039ACF100CE4793 /* ViewController.swift in Sources */,
+				DB5BA8022039B39800CE4793 /* PingAPI.swift in Sources */,
 				DB5BA7F52039ADA300CE4793 /* Services.swift in Sources */,
 				DB5BA7B82039ACF100CE4793 /* AppDelegate.swift in Sources */,
 				DB5BA7F62039ADA300CE4793 /* ServiceSetup.swift in Sources */,
@@ -395,12 +423,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = Ping/Info.plist;
+				INFOPLIST_FILE = Ping/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.frallware.Ping;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -409,12 +437,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = Ping/Info.plist;
+				INFOPLIST_FILE = Ping/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.frallware.Ping;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

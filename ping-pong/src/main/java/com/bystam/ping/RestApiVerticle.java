@@ -54,9 +54,9 @@ public class RestApiVerticle extends AbstractVerticle {
                 JsonArray services = ar.result().body();
                 services.forEach(o -> {
                     JsonObject service = (JsonObject)o;
-                    Long time = service.getLong("lastChecked");
+                    Long time = service.getLong("lastCheck");
                     if (time != null) {
-                        service.put("lastChecked", DATE_FORMAT.format(new Date(time)));
+                        service.put("lastCheck", DATE_FORMAT.format(new Date(time)));
                     }
                 });
 

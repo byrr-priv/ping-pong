@@ -98,7 +98,7 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
 
                         service
                                 .put("status", pingResults.getString(serviceId))
-                                .put("lastChecked", time);
+                                .put("lastCheck", time);
                     });
 
                     return writeServices(services);
