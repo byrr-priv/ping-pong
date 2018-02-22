@@ -26,11 +26,11 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
         vertx.eventBus().consumer(UPDATE_PING, this::updatePing);
 
         vertx.fileSystem().exists(SERVICES_FILE, event -> {
-           if (!event.result()) {
-               vertx.fileSystem().writeFile(SERVICES_FILE, new JsonArray().toBuffer(), startFuture.completer());
-           } else {
-               startFuture.complete();
-           }
+            if (!event.result()) {
+                vertx.fileSystem().writeFile(SERVICES_FILE, new JsonArray().toBuffer(), startFuture.completer());
+            } else {
+                startFuture.complete();
+            }
         });
     }
 
@@ -69,7 +69,7 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
                 .compose(services -> {
                     JsonArray updated = new JsonArray();
                     services.stream()
-                            .map(o -> (JsonObject)o)
+                            .map(o -> (JsonObject) o)
                             .filter(o -> !o.getString("id").equals(serviceId))
                             .forEach(updated::add);
                     return writeServices(updated);
@@ -91,9 +91,8 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
                 .compose(services -> {
 
                     // set ping result state for each service
-                    services.stream()
-                            .forEach(o -> {
-                        JsonObject service = (JsonObject)o;
+                    services.forEach(o -> {
+                        JsonObject service = (JsonObject) o;
                         String serviceId = service.getString("id");
 
                         service
@@ -108,11 +107,11 @@ public class ServiceDatabaseVerticle extends AbstractVerticle {
     private Future<JsonArray> readServices() {
         Future<JsonArray> future = Future.future();
         vertx.fileSystem().readFile(SERVICES_FILE, ar -> {
-           if (ar.succeeded()) {
-               future.complete(ar.result().toJsonArray());
-           } else {
-               future.fail(ar.cause());
-           }
+            if (ar.succeeded()) {
+                future.complete(ar.result().toJsonArray());
+            } else {
+                future.fail(ar.cause());
+            }
         });
         return future;
     }

@@ -31,8 +31,7 @@ public class UrlPingerVerticle extends AbstractVerticle {
         fetchAllServices()
                 .compose(services -> {
 
-                    List<Future> pingFutures =
-                            services.stream()
+                    List<Future> pingFutures = services.stream()
                             .map(this::createPingRequest)
                             .map(this::pingService)
                             .collect(Collectors.toList());
@@ -40,13 +39,13 @@ public class UrlPingerVerticle extends AbstractVerticle {
                     // pingFutures had to be type erased due to CompositeFuture.all
                     // here, we dig out the underlying PingResponse objects
                     return CompositeFuture.all(pingFutures).map(c -> pingFutures.stream()
-                            .map(f -> (PingResponse)f.result())
+                            .map(f -> (PingResponse) f.result())
                             .collect(Collectors.toList()));
                 })
                 .setHandler(responses -> {
                     // create a result message and send it to the database
                     JsonObject resultMessage = new JsonObject();
-                    responses.result().stream()
+                    responses.result()
                             .forEach(res -> {
                                 resultMessage.put(res.serviceId, res.status);
                             });
@@ -62,7 +61,7 @@ public class UrlPingerVerticle extends AbstractVerticle {
     }
 
     private PingRequest createPingRequest(Object o) {
-        JsonObject service = (JsonObject)o;
+        JsonObject service = (JsonObject) o;
         String serviceId = service.getString("id");
         String url = service.getString("url");
         return new PingRequest(serviceId, url);
@@ -70,6 +69,8 @@ public class UrlPingerVerticle extends AbstractVerticle {
 
     private Future<PingResponse> pingService(PingRequest request) {
         Future<PingResponse> pingFuture = Future.future();
+
+        System.out.println("Pinging url: " + request.url);
 
         client.getAbs(request.url).handler(response -> {
             if (response.statusCode() == 200) {

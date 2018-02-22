@@ -53,7 +53,7 @@ public class RestApiVerticle extends AbstractVerticle {
                 // reformat timestamps in a readable time format
                 JsonArray services = ar.result().body();
                 services.forEach(o -> {
-                    JsonObject service = (JsonObject)o;
+                    JsonObject service = (JsonObject) o;
                     Long time = service.getLong("lastCheck");
                     if (time != null) {
                         service.put("lastCheck", DATE_FORMAT.format(new Date(time)));
