@@ -21,7 +21,7 @@ extension PingViewModel {
     func fetchServices() {
         let api = Services.find(type: PingAPI.self)
         api.getAll()
-            .dispatch(on: .main)
+            .complete(on: .main)
             .onSuccess { (res) in
                 self.services.set(res.services)
             }
@@ -42,7 +42,7 @@ extension PingViewModel {
         let request = Ping.AddRequest(url: url, name: name)
         let api = Services.find(type: PingAPI.self)
         api.add(request)
-            .dispatch(on: .main)
+            .complete(on: .main)
             .onSuccess {
                 self.fetchServices()
             }
@@ -56,7 +56,7 @@ extension PingViewModel {
         let service = services.value[index]
         let api = Services.find(type: PingAPI.self)
         api.delete(id: service.id)
-            .dispatch(on: .main)
+            .complete(on: .main)
             .onSuccess {
                 self.fetchServices()
             }

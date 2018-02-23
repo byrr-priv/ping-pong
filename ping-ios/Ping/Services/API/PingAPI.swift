@@ -48,11 +48,11 @@ class _PingAPI: PingAPI {
     func add(_ request: Ping.AddRequest) -> HTTPClient.Task<Void> {
         let data = try! encoder.encode(request)
         return client
-            .completingRequest(.post, path: "/service", body: data)
+            .voidRequest(.post, path: "/service", body: data)
     }
 
     func delete(id: String) -> HTTPClient.Task<Void> {
         return client
-            .completingRequest(.delete, path: "/service/\(id)", body: nil)
+            .voidRequest(.delete, path: "/service/\(id)", body: nil)
     }
 }
